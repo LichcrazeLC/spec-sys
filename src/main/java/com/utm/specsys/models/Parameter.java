@@ -3,8 +3,10 @@ package com.utm.specsys.models;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="parameters")
 class Parameter {
 
     @Id@GeneratedValue Long id;

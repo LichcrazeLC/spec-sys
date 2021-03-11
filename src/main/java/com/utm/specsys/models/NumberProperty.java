@@ -1,8 +1,10 @@
 package com.utm.specsys.models;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
+@DiscriminatorValue("4")
 public class NumberProperty extends Property {
     private Integer example;
 

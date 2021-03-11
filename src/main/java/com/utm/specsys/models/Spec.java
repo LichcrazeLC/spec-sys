@@ -6,8 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="specs")
 public class Spec {
 
     private @Id @GeneratedValue Long id;
@@ -15,19 +17,19 @@ public class Spec {
     private String dateCreated;
     private String lastUpdated;
 
-    @OneToMany
+    @OneToMany(mappedBy="spec")
     private List<ResourceType> resourceTypes;
 
-    @OneToMany
+    @OneToMany(mappedBy="spec")
     private List<Trait> traits;
 
-    @OneToMany
+    @OneToMany(mappedBy="spec")
     private List<Example> examples;
 
-    @OneToMany
+    @OneToMany(mappedBy="spec")
     private List<DataType> dataTypes;
 
-    @OneToMany
+    @OneToMany(mappedBy="spec")
     private List<Endpoint> endpoints;
 
     Spec() {}

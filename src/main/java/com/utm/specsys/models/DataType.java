@@ -4,16 +4,32 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="data_types")
 public class DataType {
     @Id@GeneratedValue Long id;
     private String name;
     private Short exampleReferenceIndex;
     private String type;
-    @OneToMany
+
+    @ManyToOne
+    @JoinColumn(name="spec_id", nullable=false)
+    private Spec spec;
+
+    @OneToMany(mappedBy="dataType")
     private List<Property> properties;
+
+    @OneToOne(mappedBy = "dataType")
+    private Endpoint endpoint;
+
+    @OneToOne(mappedBy = "dataType")
+    private Method method;
 
     DataType () {}
 

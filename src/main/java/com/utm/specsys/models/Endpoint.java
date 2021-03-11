@@ -1,41 +1,61 @@
 package com.utm.specsys.models;
 
 import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="endpoints")
 public class Endpoint {
     @Id@GeneratedValue Long id;
     private String path;
     private String method;
-    @OneToMany
+
+    @ManyToOne
+    @JoinColumn(name="spec_id", nullable=false)
+    private Spec spec;
+
+    @OneToMany(mappedBy="endpoint")
     private List<QueryParameter> queryParameters;
-    @OneToMany
+    @OneToMany(mappedBy="endpoint")
     private List<URIParameter> uriParameters;
-    @OneToMany
+    @OneToMany(mappedBy="endpoint")
     private List<Header> headers;
-    private Short typeReferenceIndex;
-    @OneToMany
-    private List<Trait> traitsReferenceIndexes;
-    private Short bodyReferenceIndex;
-    @OneToMany
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "data_type_id", referencedColumnName = "id")
+    private DataType dataType;
+    
+    @OneToMany(mappedBy="endpoint")
+    private List<Trait> traits;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "example_id", referencedColumnName = "id")
+    private Example example;
+
+    @OneToMany(mappedBy="endpoint")
     private List<Response> responses;
 
     Endpoint () {}
 
 
-    public Endpoint(String path, String method, List<QueryParameter> queryParameters, List<URIParameter> uriParameters, List<Header> headers, Short typeReferenceIndex, List<Trait> traitsReferenceIndexes, Short bodyReferenceIndex, List<Response> responses) {
+    public Endpoint(String path, String method, List<QueryParameter> queryParameters, List<URIParameter> uriParameters, List<Header> headers, DataType dataType, List<Trait> traits, Example example, List<Response> responses) {
         this.path = path;
         this.method = method;
         this.queryParameters = queryParameters;
         this.uriParameters = uriParameters;
         this.headers = headers;
-        this.typeReferenceIndex = typeReferenceIndex;
-        this.traitsReferenceIndexes = traitsReferenceIndexes;
-        this.bodyReferenceIndex = bodyReferenceIndex;
+        this.dataType = dataType;
+        this.traits = traits;
+        this.example = example;
         this.responses = responses;
     }
 
@@ -79,28 +99,28 @@ public class Endpoint {
         this.headers = headers;
     }
 
-    public Short getTypeReferenceIndex() {
-        return this.typeReferenceIndex;
+    public DataType getdataType() {
+        return this.dataType;
     }
 
-    public void setTypeReferenceIndex(Short typeReferenceIndex) {
-        this.typeReferenceIndex = typeReferenceIndex;
+    public void setdataType(DataType dataType) {
+        this.dataType = dataType;
     }
 
-    public List<Trait> getTraitsReferenceIndexes() {
-        return this.traitsReferenceIndexes;
+    public List<Trait> getTraits() {
+        return this.traits;
     }
 
-    public void setTraitsReferenceIndexes(List<Trait> traitsReferenceIndexes) {
-        this.traitsReferenceIndexes = traitsReferenceIndexes;
+    public void setTraitsReferenceIndexes(List<Trait> traits) {
+        this.traits = traits;
     }
 
-    public Short getBodyReferenceIndex() {
-        return this.bodyReferenceIndex;
+    public Example getexample() {
+        return this.example;
     }
 
-    public void setBodyReferenceIndex(Short bodyReferenceIndex) {
-        this.bodyReferenceIndex = bodyReferenceIndex;
+    public void setexample(Example example) {
+        this.example = example;
     }
 
     public List<Response> getResponses() {

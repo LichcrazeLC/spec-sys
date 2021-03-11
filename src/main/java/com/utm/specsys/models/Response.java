@@ -1,20 +1,37 @@
 package com.utm.specsys.models;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="responses")
 public class Response {
     @Id@GeneratedValue Long id;
     private String httpStatus;
-    private Short bodyExampleReferenceIndex;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "example_id", referencedColumnName = "id")
+    private Example example;
+
+    @ManyToOne
+    @JoinColumn(name="method_id", nullable=false)
+    private Trait method;
+
+    @ManyToOne
+    @JoinColumn(name="endpoint_id", nullable=false)
+    private Endpoint endpoint;
 
     Response () {}
 
-    public Response(String httpStatus, Short bodyExampleReferenceIndex) {
+    public Response(String httpStatus, Example example) {
         this.httpStatus = httpStatus;
-        this.bodyExampleReferenceIndex = bodyExampleReferenceIndex;
+        this.example = example;
     }
 
     public String getHttpStatus() {
@@ -25,12 +42,12 @@ public class Response {
         this.httpStatus = httpStatus;
     }
 
-    public Short getBodyExampleReferenceIndex() {
-        return this.bodyExampleReferenceIndex;
+    public Example getExample() {
+        return this.example;
     }
 
-    public void setBodyExampleReferenceIndex(Short bodyExampleReferenceIndex) {
-        this.bodyExampleReferenceIndex = bodyExampleReferenceIndex;
+    public void setExample(Example example) {
+        this.example = example;
     }
 
 

@@ -1,24 +1,29 @@
 package com.utm.specsys.models;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 
 @Entity
+@DiscriminatorValue("2")
 public class ArrayProperty extends Property {
-    private Short itemsReferenceIndex;
+
+    @JoinColumn(name="data_type_id", nullable=false)
+    private DataType dataType;
 
     ArrayProperty () {}
 
-    public ArrayProperty(String name, Boolean required, String type, Short itemsReferenceIndex) {
+    public ArrayProperty(String name, Boolean required, String type, DataType dataType) {
         super(name, required, type);
-        this.itemsReferenceIndex = itemsReferenceIndex;
+        this.dataType = dataType;
     }
     
-    public Short getItemsReferenceIndex() {
-        return this.itemsReferenceIndex;
+    public DataType getItemsReferenceIndex() {
+        return this.dataType;
     }
 
-    public void setItemsReferenceIndex(Short itemsReferenceIndex) {
-        this.itemsReferenceIndex = itemsReferenceIndex;
+    public void setItemsReferenceIndex(DataType dataType) {
+        this.dataType = dataType;
     }
 
 }

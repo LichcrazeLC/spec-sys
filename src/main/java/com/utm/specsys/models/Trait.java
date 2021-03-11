@@ -5,14 +5,29 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 @Entity
+@Table(name="traits")
 public class Trait {
     @Id@GeneratedValue Long id;
+
+    @ManyToOne
+    @JoinColumn(name="spec_id", nullable=false)
+    private Spec spec;
+
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy="trait")
     private List<QueryParameter> queryParams;
+
+    @ManyToOne
+    @JoinColumn(name="method_id", nullable=false)
+    private Trait method;
+
+    @ManyToOne
+    @JoinColumn(name="endpoint_id", nullable=false)
+    private Endpoint endpoint;
 
     Trait () {}
 

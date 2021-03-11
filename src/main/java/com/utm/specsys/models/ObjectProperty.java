@@ -2,13 +2,15 @@ package com.utm.specsys.models;
 
 import java.util.List;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 @Entity
+@DiscriminatorValue("1")
 public class ObjectProperty extends Property {
 
-    @OneToMany
+    @OneToMany(mappedBy="property")
     private List<Property> properties;
 
     ObjectProperty () {}

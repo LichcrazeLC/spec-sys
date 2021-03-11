@@ -1,12 +1,22 @@
 package com.utm.specsys.models;
 
 import javax.persistence.Entity;
+import javax.persistence.*;
 
 @Entity
+@DiscriminatorValue("3")
 class Header extends Parameter {
 
     private String description;
     private Boolean required;
+    
+    @ManyToOne
+    @JoinColumn(name="method_id", nullable=false)
+    private Method method;
+
+    @ManyToOne
+    @JoinColumn(name="endpoint_id", nullable=false)
+    private Endpoint endpoint;
 
     Header() {}
 

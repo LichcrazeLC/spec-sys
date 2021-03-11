@@ -1,12 +1,26 @@
 package com.utm.specsys.models;
 
 import javax.persistence.Entity;
+import javax.persistence.*;
 
 @Entity
+@DiscriminatorValue("1")
 class QueryParameter extends Parameter {
 
     private String description;
     private Boolean required;
+
+    @ManyToOne
+    @JoinColumn(name="trait_id", nullable=false)
+    private Trait trait;
+
+    @ManyToOne
+    @JoinColumn(name="method_id", nullable=false)
+    private Trait method;
+
+    @ManyToOne
+    @JoinColumn(name="endpoint_id", nullable=false)
+    private Endpoint endpoint;
 
     QueryParameter() {}
 

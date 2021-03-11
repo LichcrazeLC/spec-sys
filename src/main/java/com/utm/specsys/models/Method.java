@@ -4,39 +4,51 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
+@Table(name="methods")
 public class Method {
     @Id@GeneratedValue Long id;
     private String method;
     private String description;
 
-    @OneToMany
+    @OneToMany(mappedBy="method")
     private List<QueryParameter> queryParameters;
 
-    @OneToMany
+    @OneToMany(mappedBy="method")
     private List<URIParameter> uriParameters;
 
-    @OneToMany
+    @OneToMany(mappedBy="method")
     private List<Header> headers;
-    private Short bodyTypeReferenceIndex;
 
-    @OneToMany
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "data_type_id", referencedColumnName = "id")
+    private DataType dataType;
+
+    @OneToMany(mappedBy="method")
     private List<Trait> traits;
 
-    @OneToMany
+    @OneToMany(mappedBy="method")
     private List<Response> responses;
+
+    @ManyToOne
+    @JoinColumn(name="resource_type_id", nullable=false)
+    private ResourceType resourceType;
 
     Method () {}
 
-    public Method(String method, String description, List<QueryParameter> queryParameters, List<URIParameter> uriParameters, List<Header> headers, Short bodyTypeReferenceIndex, List<Trait> traits, List<Response> responses) {
+    public Method(String method, String description, List<QueryParameter> queryParameters, List<URIParameter> uriParameters, List<Header> headers, DataType dataType, List<Trait> traits, List<Response> responses) {
         this.method = method;
         this.description = description;
         this.queryParameters = queryParameters;
         this.uriParameters = uriParameters;
         this.headers = headers;
-        this.bodyTypeReferenceIndex = bodyTypeReferenceIndex;
+        this.dataType = dataType;
         this.traits = traits;
         this.responses = responses;
     }
@@ -82,12 +94,12 @@ public class Method {
         this.headers = headers;
     }
 
-    public Short getBodyTypeReferenceIndex() {
-        return this.bodyTypeReferenceIndex;
+    public DataType getdataType() {
+        return this.dataType;
     }
 
-    public void setBodyTypeReferenceIndex(Short bodyTypeReferenceIndex) {
-        this.bodyTypeReferenceIndex = bodyTypeReferenceIndex;
+    public void setdataType(DataType dataType) {
+        this.dataType = dataType;
     }
 
     public List<Trait> getTraits() {
