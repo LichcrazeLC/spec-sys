@@ -4,7 +4,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
-@DiscriminatorValue("4")
+@DiscriminatorValue("number")
 public class NumberProperty extends Property {
     private Integer example;
 

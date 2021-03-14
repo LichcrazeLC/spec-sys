@@ -1,5 +1,7 @@
 package com.utm.specsys.models;
 
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -9,18 +11,20 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="properties")
+@DiscriminatorColumn(name = "type")
 public class Property {
     @Id@GeneratedValue Long id;
     private String name;
     private Boolean required;
+    
+    @Column(name = "type", insertable = false, updatable = false)
     private String type;
 
     @ManyToOne
-    @JoinColumn(name="parent_property_id", nullable=false)
-    private Property property;
+    private Property parentProperty;
 
     @ManyToOne
-    @JoinColumn(name="data_type_id", nullable=false)
+    @JoinColumn(name="data_type_id", nullable=true)
     private DataType dataType;
 
     Property () {}
@@ -57,6 +61,30 @@ public class Property {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Property getParentProperty() {
+        return this.parentProperty;
+    }
+
+    public void setParentProperty(Property property) {
+        this.parentProperty = property;
+    }
+
+    public DataType getDataType() {
+        return this.dataType;
+    }
+
+    public void setDataType(DataType dataType) {
+        this.dataType = dataType;
     }
 
 }

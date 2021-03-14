@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("array")
 public class ArrayProperty extends Property {
 
     @JoinColumn(name="data_type_id", nullable=false)

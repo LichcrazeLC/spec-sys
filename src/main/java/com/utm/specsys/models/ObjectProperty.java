@@ -2,15 +2,16 @@ package com.utm.specsys.models;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("object")
 public class ObjectProperty extends Property {
 
-    @OneToMany(mappedBy="property")
+    @OneToMany(mappedBy="parentProperty", cascade = CascadeType.ALL)
     private List<Property> properties;
 
     ObjectProperty () {}

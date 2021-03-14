@@ -4,7 +4,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
-@DiscriminatorValue("3")
+@DiscriminatorValue("string")
 public class StringProperty extends Property {
     private String example;
 
