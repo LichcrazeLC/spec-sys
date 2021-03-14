@@ -3,6 +3,8 @@ package com.utm.specsys.models;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class File {
@@ -14,6 +16,10 @@ public class File {
     String name;
 
     String location;
+
+    @ManyToOne
+    @JoinColumn(name="spec_id", nullable=false)
+    private Spec spec;
 
     public File() {
 
