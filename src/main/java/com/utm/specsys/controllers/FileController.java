@@ -6,7 +6,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import com.utm.specsys.exceptions.SpecNotFoundForUserException;
+import com.utm.specsys.models.Spec;
+import com.utm.specsys.repositories.SpecRepository;
 import com.utm.specsys.services.FileLocationService;
 
 
@@ -16,13 +18,24 @@ public class FileController {
     @Autowired
     FileLocationService fileLocationService;
 
-    @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    Long uploadImage(@RequestParam MultipartFile file) throws Exception {
-        return fileLocationService.save(file.getBytes(), file.getOriginalFilename());
+    @Autowired
+    SpecRepository specRepository;
+
+    @PostMapping(value = "/users/{userId}/specs/{specId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    Long uploadFile(@RequestParam MultipartFile file, @PathVariable Long userId, @PathVariable Long specId) throws Exception {
+
+        Spec spec = specRepository.findByIdAndUserId(specId, userId).orElseThrow(() ->  new SpecNotFoundForUserException(specId, userId));
+        
+        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), spec);
     }
 
-    @GetMapping(value = "/files/{fileId}")
-    FileSystemResource downloadImage(@PathVariable Long fileId) throws Exception {
-        return fileLocationService.find(fileId);
+    @PutMapping(value = "/users/{userId}/specs/{specId}/files/{fileName}")
+    Long replaceFile(@RequestParam MultipartFile file, @PathVariable String fileName, @PathVariable Long userId, @PathVariable Long specId) throws Exception {
+        return fileLocationService.replace(file.getBytes(), file.getOriginalFilename(), userId, specId, fileName);
+    }
+
+    @GetMapping(value = "/users/{userId}/specs/{specId}/files/{fileName}")
+    FileSystemResource getFileByName(@PathVariable String fileName, @PathVariable Long userId, @PathVariable Long specId) throws Exception {
+        return fileLocationService.find(userId, specId, fileName);
     }
 }

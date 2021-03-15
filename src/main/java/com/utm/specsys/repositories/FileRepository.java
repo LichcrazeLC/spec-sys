@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
-
 
 @Repository
 public class FileRepository {
@@ -21,6 +21,23 @@ public class FileRepository {
         Files.write(newFile, content);
 
         return newFile.toAbsolutePath().toString();
+    }
+
+    public String update(byte[] content, String location, String newFileName) {
+
+        try {
+            Path newFile = Paths.get(location);
+
+            Files.write(newFile, content);
+
+            newFile = Files.move(newFile, newFile.getParent().resolve(new Date().getTime() + "-" + newFileName), StandardCopyOption.REPLACE_EXISTING);
+
+            return newFile.toAbsolutePath().toString();
+        } catch (Exception e) {
+            // Handle file update problems.
+            throw new RuntimeException();
+        }
+
     }
 
     public FileSystemResource findInFileSystem(String location) {

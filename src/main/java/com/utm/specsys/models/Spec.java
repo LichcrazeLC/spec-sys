@@ -1,24 +1,25 @@
 package com.utm.specsys.models;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@JsonIgnoreProperties(value = { "user" })
 public class Spec {
 
     @Id
@@ -28,31 +29,34 @@ public class Spec {
     String name;
 
     @Column(name = "created_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     @CreationTimestamp
-    private Date created;
+    private LocalDateTime created;
 
     @Column(name = "updated_datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	@UpdateTimestamp
-	private Date updated;
+	private LocalDateTime updated;
 
     @ManyToOne
     @JoinColumn(name="owner_id", nullable=false)
-    private User owner;
+    @JsonIgnore
+    private User user;
 
-    @OneToMany(mappedBy="spec")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="spec")
+    @JsonIgnore
     private Set<File> files;
 
     public Spec() {
 
     }
 
-
-    public Spec(Long id, String name, Date created, Date updated, User user, Set<File> files) {
+    public Spec(Long id, String name, LocalDateTime created, LocalDateTime updated, User user, Set<File> files) {
         this.id = id;
         this.name = name;
         this.created = created;
         this.updated = updated;
-        this.owner = user;
+        this.user = user;
         this.files = files;
     }
 
@@ -72,28 +76,28 @@ public class Spec {
         this.name = name;
     }
 
-    public Date getCreated() {
+    public LocalDateTime getCreated() {
         return this.created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(LocalDateTime created) {
         this.created = created;
     }
 
-    public Date getUpdated() {
+    public LocalDateTime getUpdated() {
         return this.updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(LocalDateTime updated) {
         this.updated = updated;
     }
 
     public User getUser() {
-        return this.owner;
+        return this.user;
     }
 
     public void setUser(User user) {
-        this.owner = user;
+        this.user = user;
     }
 
     public Set<File> getFiles() {
@@ -114,12 +118,12 @@ public class Spec {
         return this;
     }
 
-    public Spec created(Date created) {
+    public Spec created(LocalDateTime created) {
         setCreated(created);
         return this;
     }
 
-    public Spec updated(Date updated) {
+    public Spec updated(LocalDateTime updated) {
         setUpdated(updated);
         return this;
     }
@@ -142,12 +146,12 @@ public class Spec {
             return false;
         }
         Spec spec = (Spec) o;
-        return Objects.equals(id, spec.id) && Objects.equals(name, spec.name) && Objects.equals(created, spec.created) && Objects.equals(updated, spec.updated) && Objects.equals(owner, spec.owner) && Objects.equals(files, spec.files);
+        return Objects.equals(id, spec.id) && Objects.equals(name, spec.name) && Objects.equals(created, spec.created) && Objects.equals(updated, spec.updated) && Objects.equals(user, spec.user) && Objects.equals(files, spec.files);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, created, updated, owner, files);
+        return Objects.hash(id, name, created, updated, user, files);
     }
 
     @Override

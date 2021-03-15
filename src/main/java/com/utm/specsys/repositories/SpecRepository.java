@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SpecRepository extends JpaRepository<Spec, Long> {
-    List<Spec> findByOwnerId(Long userId);
-    Optional<Spec> findByIdAndOwnerId(Long id, Long userId);
+    List<Spec> findByUserId(Long userId);
+    Optional<Spec> findByIdAndUserId(Long id, Long userId);
+    Boolean existsByIdAndUserId(Long id, Long userId);
 }

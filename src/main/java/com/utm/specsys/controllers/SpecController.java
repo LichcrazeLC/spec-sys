@@ -24,7 +24,7 @@ public class SpecController {
 
     @GetMapping("/users/{userId}/specs")
     List<Spec> all(@PathVariable Long userId) {
-        return specRepository.findByOwnerId(userId);
+        return specRepository.findByUserId(userId);
     }
 
     @PostMapping("/users/{userId}/specs")
@@ -38,13 +38,13 @@ public class SpecController {
     @GetMapping("/users/{userId}/specs/{id}")
     Spec one(@PathVariable Long userId, @PathVariable Long id) {
 
-        return specRepository.findByIdAndOwnerId(id, userId).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
+        return specRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
     }
 
     @PutMapping("/users/{userId}/specs/{id}")
     Spec replaceSpec(@RequestBody Spec newSpec, @PathVariable Long userId, @PathVariable Long id) {
 
-        return specRepository.findByIdAndOwnerId(id, userId).map(Spec -> {
+        return specRepository.findByIdAndUserId(id, userId).map(Spec -> {
             Spec.setName(newSpec.getName());
             return specRepository.save(Spec);
         }).orElseThrow(() -> 
@@ -54,7 +54,7 @@ public class SpecController {
 
     @DeleteMapping("/users/{userId}/specs/{id}")
     public ResponseEntity<?> deleteSpec(@PathVariable Long userId, @PathVariable Long id) {
-        return specRepository.findByIdAndOwnerId(id, userId).map(spec -> {
+        return specRepository.findByIdAndUserId(id, userId).map(spec -> {
             specRepository.delete(spec);
             return ResponseEntity.ok().build();
         }).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
