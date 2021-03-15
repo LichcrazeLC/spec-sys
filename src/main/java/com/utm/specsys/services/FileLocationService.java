@@ -53,7 +53,7 @@ public class FileLocationService {
         return fileDbRepository.findByNameAndSpecId(fileName, specId).map(File -> {
 
             String location = File.getLocation();
-            String newLocation = fileRepository.update(bytes, location, newFileName);
+            String newLocation = fileRepository.update(bytes, location, newFileName, fileName);
             File.setName(newFileName);
             File.setLocation(newLocation);
             return fileDbRepository.save(File).getId();

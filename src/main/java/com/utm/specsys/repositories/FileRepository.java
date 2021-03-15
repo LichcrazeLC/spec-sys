@@ -23,16 +23,20 @@ public class FileRepository {
         return newFile.toAbsolutePath().toString();
     }
 
-    public String update(byte[] content, String location, String newFileName) {
+    public String update(byte[] content, String location, String newFileName, String oldFileName) {
 
         try {
             Path newFile = Paths.get(location);
 
             Files.write(newFile, content);
 
-            newFile = Files.move(newFile, newFile.getParent().resolve(new Date().getTime() + "-" + newFileName), StandardCopyOption.REPLACE_EXISTING);
-
-            return newFile.toAbsolutePath().toString();
+            if (!newFileName.equals(oldFileName)) {
+                newFile = Files.move(newFile, newFile.getParent().resolve(new Date().getTime() + "-" + newFileName),
+                        StandardCopyOption.REPLACE_EXISTING);
+                return newFile.toAbsolutePath().toString();
+            } else {
+                return location;
+            }
         } catch (Exception e) {
             // Handle file update problems.
             throw new RuntimeException();
