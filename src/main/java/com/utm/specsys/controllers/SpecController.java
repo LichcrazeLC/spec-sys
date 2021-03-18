@@ -13,6 +13,7 @@ import com.utm.specsys.models.User;
 import com.utm.specsys.repositories.SpecRepository;
 import com.utm.specsys.repositories.UserRepository;
 
+@CrossOrigin
 @RestController
 public class SpecController {
 

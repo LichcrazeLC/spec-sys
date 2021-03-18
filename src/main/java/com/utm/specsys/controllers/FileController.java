@@ -11,7 +11,7 @@ import com.utm.specsys.models.Spec;
 import com.utm.specsys.repositories.SpecRepository;
 import com.utm.specsys.services.FileLocationService;
 
-
+@CrossOrigin
 @RestController
 public class FileController {
 
