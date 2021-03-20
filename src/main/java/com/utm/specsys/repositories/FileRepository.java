@@ -1,5 +1,6 @@
 package com.utm.specsys.repositories;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,8 @@ import java.util.Date;
 @Repository
 public class FileRepository {
 
-    String RESOURCES_DIR = "C:\\Users\\cioca\\Documents\\Workspace\\Teza_Licenta\\spec-storage-fs\\";
+    @Value("${fileStorageDir.path}")
+    String RESOURCES_DIR;
 
     public String save(byte[] content, String fileName) throws Exception {
         Path newFile = Paths.get(RESOURCES_DIR + new Date().getTime() + "-" + fileName);
