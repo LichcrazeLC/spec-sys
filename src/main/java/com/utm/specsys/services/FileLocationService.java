@@ -1,5 +1,7 @@
 package com.utm.specsys.services;
 
+import java.util.List;
+
 import com.utm.specsys.exceptions.FileNotFoundForSpecException;
 import com.utm.specsys.exceptions.SpecNotFoundForUserException;
 import com.utm.specsys.models.File;
@@ -42,6 +44,15 @@ public class FileLocationService {
                 .orElseThrow(() -> new FileNotFoundForSpecException(fileName, specId));
 
         return fileRepository.findInFileSystem(file.getLocation());
+    }
+
+    public List<String> findAllFileNames(Long userId, Long specId) {
+
+        if (!specRepository.existsByIdAndUserId(specId, userId)) {
+            throw new SpecNotFoundForUserException(specId, userId);
+        }
+
+        return fileDbRepository.findAllFileNamesBySpecId(specId);
     }
 
     public Long replace(byte[] bytes, String newFileName, Long userId, Long specId, String fileName) {

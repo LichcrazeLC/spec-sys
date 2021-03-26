@@ -6,9 +6,14 @@ import com.utm.specsys.models.File;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface FileDbRepository extends JpaRepository<File, Long> {
+
+    @Query(value= "select f.name from file f where spec_id = ?1", nativeQuery= true)
+    List<String> findAllFileNamesBySpecId(Long specId);
+
     List<File> findBySpecId(Long specId);
     Optional<File> findByIdAndSpecId(Long id, Long specId);
     Optional<File> findByNameAndSpecId(String name, Long specId);

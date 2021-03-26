@@ -6,6 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import com.utm.specsys.exceptions.SpecNotFoundForUserException;
 import com.utm.specsys.models.Spec;
 import com.utm.specsys.repositories.SpecRepository;
@@ -37,5 +39,10 @@ public class FileController {
     @GetMapping(value = "/users/{userId}/specs/{specId}/files/{fileName}")
     FileSystemResource getFileByName(@PathVariable String fileName, @PathVariable Long userId, @PathVariable Long specId) throws Exception {
         return fileLocationService.find(userId, specId, fileName);
+    }
+
+    @GetMapping(value = "/users/{userId}/specs/{specId}/files")
+    List<String> getFileNames(@PathVariable Long userId, @PathVariable Long specId) throws Exception {
+        return fileLocationService.findAllFileNames(userId, specId);
     }
 }
