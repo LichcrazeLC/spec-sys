@@ -1,45 +1,20 @@
 package com.utm.specsys.models;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-@Entity
 public class User {
 
-    @Id
-    @GeneratedValue
     Long id;
 
     String firstName;
 
     String lastName;
 
-    @Column(name = "created_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
-    @CreationTimestamp
-    private LocalDateTime created;
+    String email;
 
-    @Column(name = "updated_datetime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
-	@UpdateTimestamp
-	private LocalDateTime updated;
+    String password;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy="user")
-    @JsonIgnore
     private Set<Spec> specs;
 
     public User() {
@@ -50,15 +25,6 @@ public class User {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.specs = specs;
-    }
-
-    public User(Long id, String firstName, String lastName, LocalDateTime created, LocalDateTime updated, Set<Spec> specs) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.created = created;
-        this.updated = updated;
         this.specs = specs;
     }
 
@@ -77,16 +43,6 @@ public class User {
         return this;
     }
 
-    public User created(LocalDateTime created) {
-        setCreated(created);
-        return this;
-    }
-
-    public User updated(LocalDateTime updated) {
-        setUpdated(updated);
-        return this;
-    }
-
     public User specs(Set<Spec> specs) {
         setSpecs(specs);
         return this;
@@ -100,12 +56,12 @@ public class User {
             return false;
         }
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(created, user.created) && Objects.equals(updated, user.updated) && Objects.equals(specs, user.specs);
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(specs, user.specs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, created, updated, specs);
+        return Objects.hash(id, firstName, lastName, specs);
     }
 
     @Override
@@ -114,10 +70,24 @@ public class User {
             " id='" + getId() + "'" +
             ", firstName='" + getFirstName() + "'" +
             ", lastName='" + getLastName() + "'" +
-            ", created='" + getCreated() + "'" +
-            ", updated='" + getUpdated() + "'" +
             ", specs='" + getSpecs() + "'" +
             "}";
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
  
 
@@ -151,22 +121,6 @@ public class User {
 
     public void setSpecs(Set<Spec> specs) {
         this.specs = specs;
-    }
-
-    public LocalDateTime getCreated() {
-        return this.created;
-    }
-
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
-    }
-
-    public LocalDateTime getUpdated() {
-        return this.updated;
-    }
-
-    public void setUpdated(LocalDateTime updated) {
-        this.updated = updated;
     }
 
 

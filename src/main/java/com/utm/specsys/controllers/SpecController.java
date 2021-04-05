@@ -1,17 +1,17 @@
 package com.utm.specsys.controllers;
 
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import com.utm.specsys.exceptions.SpecNotFoundException;
 import com.utm.specsys.exceptions.SpecNotFoundForUserException;
+import com.utm.specsys.exceptions.UserNotFoundException;
 import com.utm.specsys.models.Spec;
-import com.utm.specsys.models.User;
 import com.utm.specsys.repositories.SpecRepository;
-import com.utm.specsys.repositories.UserRepository;
+import com.utm.specsys.services.KeycloakService;
 
 @CrossOrigin
 @RestController
@@ -21,43 +21,67 @@ public class SpecController {
     SpecRepository specRepository;
 
     @Autowired
-    UserRepository userRepository;
+    KeycloakService kcAdminClient;
 
     @GetMapping("/users/{userId}/specs")
-    List<Spec> all(@PathVariable Long userId) {
-        return specRepository.findByUserId(userId);
+    List<Spec> all(@PathVariable String userId) {
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+        if (foundUser != null) {
+            return specRepository.findByUserId(userId);
+        } else {
+            throw new UserNotFoundException(userId);
+        }
     }
 
     @PostMapping("/users/{userId}/specs")
-    Spec newSpec(@PathVariable Long userId, @RequestBody Spec newSpec) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new SpecNotFoundException(userId));
-        newSpec.setUser(user);
-        return specRepository.save(newSpec);
+    Spec newSpec(@PathVariable String userId, @RequestBody Spec newSpec) {
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+        if (foundUser != null) {
+            newSpec.setUserId(userId);
+            return specRepository.save(newSpec);
+        } else {
+            throw new UserNotFoundException(userId);
+        }
     }
 
     // Single item
     @GetMapping("/users/{userId}/specs/{id}")
-    Spec one(@PathVariable Long userId, @PathVariable Long id) {
+    Spec one(@PathVariable String userId, @PathVariable Long id) {
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+        if (foundUser != null) {
+            return specRepository.findByIdAndUserId(id, userId)
+                    .orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
+        } else {
+            throw new UserNotFoundException(userId);
+        }
 
-        return specRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
     }
 
     @PutMapping("/users/{userId}/specs/{id}")
-    Spec replaceSpec(@RequestBody Spec newSpec, @PathVariable Long userId, @PathVariable Long id) {
+    Spec replaceSpec(@RequestBody Spec newSpec, @PathVariable String userId, @PathVariable Long id) {
 
-        return specRepository.findByIdAndUserId(id, userId).map(Spec -> {
-            Spec.setName(newSpec.getName());
-            return specRepository.save(Spec);
-        }).orElseThrow(() -> 
-            new SpecNotFoundForUserException(id, userId)
-        );
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+        if (foundUser != null) {
+            return specRepository.findByIdAndUserId(id, userId).map(Spec -> {
+                Spec.setName(newSpec.getName());
+                return specRepository.save(Spec);
+            }).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
+        } else {
+            throw new UserNotFoundException(userId);
+        }
+
     }
 
     @DeleteMapping("/users/{userId}/specs/{id}")
-    public ResponseEntity<?> deleteSpec(@PathVariable Long userId, @PathVariable Long id) {
-        return specRepository.findByIdAndUserId(id, userId).map(spec -> {
-            specRepository.delete(spec);
-            return ResponseEntity.ok().build();
-        }).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
+    public ResponseEntity<?> deleteSpec(@PathVariable String userId, @PathVariable Long id) {
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+        if (foundUser != null) {
+            return specRepository.findByIdAndUserId(id, userId).map(spec -> {
+                specRepository.delete(spec);
+                return ResponseEntity.ok().build();
+            }).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
+        } else {
+            throw new UserNotFoundException(userId);
+        }
     }
 }

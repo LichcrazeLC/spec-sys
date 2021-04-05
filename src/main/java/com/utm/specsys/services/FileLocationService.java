@@ -34,7 +34,7 @@ public class FileLocationService {
         return fileDbRepository.save(new File(fileName, location, spec)).getId();
     }
 
-    public FileSystemResource find(Long userId, Long specId, String fileName) {
+    public FileSystemResource find(String userId, Long specId, String fileName) {
 
         if (!specRepository.existsByIdAndUserId(specId, userId)) {
             throw new SpecNotFoundForUserException(specId, userId);
@@ -46,7 +46,7 @@ public class FileLocationService {
         return fileRepository.findInFileSystem(file.getLocation());
     }
 
-    public List<String> findAllFileNames(Long userId, Long specId) {
+    public List<String> findAllFileNames(String userId, Long specId) {
 
         if (!specRepository.existsByIdAndUserId(specId, userId)) {
             throw new SpecNotFoundForUserException(specId, userId);
@@ -55,7 +55,7 @@ public class FileLocationService {
         return fileDbRepository.findAllFileNamesBySpecId(specId);
     }
 
-    public Long replace(byte[] bytes, String newFileName, Long userId, Long specId, String fileName) {
+    public Long replace(byte[] bytes, String newFileName, String userId, Long specId, String fileName) {
 
         if (!specRepository.existsByIdAndUserId(specId, userId)) {
             throw new SpecNotFoundForUserException(specId, userId);

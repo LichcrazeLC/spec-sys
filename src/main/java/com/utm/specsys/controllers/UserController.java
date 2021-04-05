@@ -1,55 +1,49 @@
 package com.utm.specsys.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-import com.utm.specsys.exceptions.UserNotFoundException;
 import com.utm.specsys.models.User;
-import com.utm.specsys.repositories.UserRepository;
+import com.utm.specsys.services.KeycloakService;
 
 @CrossOrigin
 @RestController
 public class UserController {
 
     @Autowired
-    UserRepository userRepository;
+    KeycloakService kcAdminClient;
 
     @GetMapping("/users")
-    List<User> all() {
-        return userRepository.findAll();
+    ResponseEntity<?> all() {
+        return kcAdminClient.GetAllUsers();
     }
 
     @PostMapping("/users")
-    User newUser(@RequestBody User newUser) {
-        return userRepository.save(newUser);
+    public ResponseEntity<?> newUser(@RequestBody User newUser) {
+       return kcAdminClient.SaveUser(newUser);
     }
 
-    // Single item
+    @PostMapping("/users/signin")
+    public ResponseEntity<?> logIn(@RequestBody User registeredUser) {
+       return kcAdminClient.SignIn(registeredUser);
+    }
 
     @GetMapping("/users/{id}")
-    User one(@PathVariable Long id) {
-
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    public ResponseEntity<?> one(@PathVariable String id) {
+        return ResponseEntity.ok(kcAdminClient.GetUserById(id));
     }
 
-    @PutMapping("/users/{id}")
-    User replaceUser(@RequestBody User newUser, @PathVariable Long id) {
+    @PatchMapping("/users/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void replaceUser(@RequestBody User newUser, @PathVariable String id) {
 
-        return userRepository.findById(id).map(user -> {
-            user.setFirstName(newUser.getFirstName());
-            user.setLastName(newUser.getLastName());
-            return userRepository.save(user);
-        }).orElseThrow(() -> new UserNotFoundException(id));
+        kcAdminClient.UpdatePassword(newUser.getPassword(), id);
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        return userRepository.findById(id).map(user -> {
-            userRepository.delete(user);
-            return ResponseEntity.ok().build();
-        }).orElseThrow(() -> new UserNotFoundException(id));
+    public void deleteUser(@PathVariable String id) {
+        // TO DO
     }
 }

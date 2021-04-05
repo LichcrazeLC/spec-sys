@@ -9,8 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -38,10 +36,7 @@ public class Spec {
 	@UpdateTimestamp
 	private LocalDateTime updated;
 
-    @ManyToOne
-    @JoinColumn(name="owner_id", nullable=false)
-    @JsonIgnore
-    private User user;
+    private String userId;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy="spec")
     @JsonIgnore
@@ -51,12 +46,12 @@ public class Spec {
 
     }
 
-    public Spec(Long id, String name, LocalDateTime created, LocalDateTime updated, User user, Set<File> files) {
+    public Spec(Long id, String name, LocalDateTime created, LocalDateTime updated, String userId, Set<File> files) {
         this.id = id;
         this.name = name;
         this.created = created;
         this.updated = updated;
-        this.user = user;
+        this.userId = userId;
         this.files = files;
     }
 
@@ -92,12 +87,12 @@ public class Spec {
         this.updated = updated;
     }
 
-    public User getUser() {
-        return this.user;
+    public String getUserId() {
+        return this.userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Set<File> getFiles() {
@@ -128,8 +123,8 @@ public class Spec {
         return this;
     }
 
-    public Spec user(User user) {
-        setUser(user);
+    public Spec userId(String userId) {
+        setUserId(userId);
         return this;
     }
 
@@ -146,12 +141,12 @@ public class Spec {
             return false;
         }
         Spec spec = (Spec) o;
-        return Objects.equals(id, spec.id) && Objects.equals(name, spec.name) && Objects.equals(created, spec.created) && Objects.equals(updated, spec.updated) && Objects.equals(user, spec.user) && Objects.equals(files, spec.files);
+        return Objects.equals(id, spec.id) && Objects.equals(name, spec.name) && Objects.equals(created, spec.created) && Objects.equals(updated, spec.updated) && Objects.equals(userId, spec.userId) && Objects.equals(files, spec.files);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, created, updated, user, files);
+        return Objects.hash(id, name, created, updated, userId, files);
     }
 
     @Override
@@ -161,7 +156,7 @@ public class Spec {
             ", name='" + getName() + "'" +
             ", created='" + getCreated() + "'" +
             ", updated='" + getUpdated() + "'" +
-            ", user='" + getUser() + "'" +
+            ", user='" + getUserId() + "'" +
             ", files='" + getFiles() + "'" +
             "}";
     }
