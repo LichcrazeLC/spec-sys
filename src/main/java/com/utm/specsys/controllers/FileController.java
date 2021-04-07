@@ -12,6 +12,7 @@ import com.utm.specsys.exceptions.SpecNotFoundForUserException;
 import com.utm.specsys.models.Spec;
 import com.utm.specsys.repositories.SpecRepository;
 import com.utm.specsys.services.FileLocationService;
+import com.utm.specsys.services.KeycloakService;
 
 @CrossOrigin
 @RestController
@@ -23,12 +24,19 @@ public class FileController {
     @Autowired
     SpecRepository specRepository;
 
+    @Autowired
+    KeycloakService kcAdminClient;
+
     @PostMapping(value = "/users/{userId}/specs/{specId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Long uploadFile(@RequestParam MultipartFile file, @PathVariable String userId, @PathVariable Long specId) throws Exception {
 
         Spec spec = specRepository.findByIdAndUserId(specId, userId).orElseThrow(() ->  new SpecNotFoundForUserException(specId, userId));
+
+        Long result = fileLocationService.save(file.getBytes(), file.getOriginalFilename(), spec);
+
+        kcAdminClient.CreateFile(file.getOriginalFilename(), specId, userId);
         
-        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), spec);
+        return result;
     }
 
     @PutMapping(value = "/users/{userId}/specs/{specId}/files/{fileName}")

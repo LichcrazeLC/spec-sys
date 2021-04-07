@@ -2,6 +2,7 @@ package com.utm.specsys.services;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +21,14 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.Configuration;
+import org.keycloak.authorization.client.resource.ProtectedResource;
+import org.keycloak.authorization.client.resource.ProtectionResource;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.authorization.ResourceRepresentation;
+import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -56,7 +61,7 @@ public class KeycloakService {
         }
     }
 
-    public ResponseEntity<?> SaveUser(User newUser) {
+    public User SaveUser(User newUser) {
 
         keycloak.tokenManager().getAccessToken();
 
@@ -76,6 +81,7 @@ public class KeycloakService {
         if (response.getStatus() == 201) {
 
             String userId = CreatedResponseUtil.getCreatedId(response);
+            newUser.setId(userId);
 
             CredentialRepresentation passwordCred = new CredentialRepresentation();
             passwordCred.setTemporary(false);
@@ -90,7 +96,7 @@ public class KeycloakService {
             // Assign realm role user to user
             userResource.roles().realmLevel().add(Arrays.asList(realmRoleUser));
 
-            return ResponseEntity.ok(newUser);
+            return newUser;
         } else if (response.getStatus() == 409) {
             throw new UserCreationFailedException();
         } else {
@@ -146,6 +152,81 @@ public class KeycloakService {
         UsersResource usersResource = realmResource.users();
 
         usersResource.get(id).resetPassword(passwordCred);
+    }
+
+    public void CreateSpec(String specName, Long specId, String userId) {
+
+        keycloak.tokenManager().getAccessToken();
+
+        HashSet<ScopeRepresentation> scopes = new HashSet<>();
+        scopes.add(new ScopeRepresentation("All-Access"));
+
+        ResourceRepresentation resource = new ResourceRepresentation(userId + specId, scopes,
+                "/users/" + userId + "/specs/" + specId, "urn:apibeaver-app:resources:specs");
+
+        AuthzClient authzClient = AuthzClient.create();
+        ProtectionResource protectionResource = authzClient.protection();
+        ProtectedResource resourceClient = protectionResource.resource();
+
+        resource.setOwner(userId);
+        resourceClient.create(resource);
+
+    }
+
+    public void CreateFile(String fileName, Long specId, String userId) {
+
+        keycloak.tokenManager().getAccessToken();
+
+        HashSet<ScopeRepresentation> scopes = new HashSet<>();
+        scopes.add(new ScopeRepresentation("All-Access"));
+
+        ResourceRepresentation resource = new ResourceRepresentation(userId + specId + fileName, scopes,
+                "/users/" + userId + "/specs/" + specId + "/files/" + fileName, "urn:apibeaver-app:resources:files");
+
+        AuthzClient authzClient = AuthzClient.create();
+        ProtectionResource protectionResource = authzClient.protection();
+        ProtectedResource resourceClient = protectionResource.resource();
+
+        resource.setOwner(userId);
+        resourceClient.create(resource);
+
+    }
+
+    public void CreateSpecsResource(String userId) {
+
+        keycloak.tokenManager().getAccessToken();
+        
+        HashSet<ScopeRepresentation> scopes = new HashSet<>();
+        scopes.add(new ScopeRepresentation("All-Access"));
+
+        ResourceRepresentation resource = new ResourceRepresentation("Specs for " + userId, scopes,
+                "/users/" + userId + "/specs", "urn:apibeaver-app:resources:specs");
+
+        AuthzClient authzClient = AuthzClient.create();
+        ProtectionResource protectionResource = authzClient.protection();
+        ProtectedResource resourceClient = protectionResource.resource();
+
+        resource.setOwner(userId);
+        resourceClient.create(resource);
+
+    }
+
+    public void CreateFilesResource(String userId, Long specId) {
+
+        keycloak.tokenManager().getAccessToken();
+        HashSet<ScopeRepresentation> scopes = new HashSet<>();
+        scopes.add(new ScopeRepresentation("All-Access"));
+
+        ResourceRepresentation resource = new ResourceRepresentation("Files for " + userId + specId, scopes,
+                "/users/" + userId + "/specs/" + specId + "/files", "urn:apibeaver-app:resources:files");
+
+        AuthzClient authzClient = AuthzClient.create();
+        ProtectionResource protectionResource = authzClient.protection();
+        ProtectedResource resourceClient = protectionResource.resource();
+
+        resource.setOwner(userId);
+        resourceClient.create(resource);
+
     }
 
 }

@@ -38,7 +38,10 @@ public class SpecController {
         UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
         if (foundUser != null) {
             newSpec.setUserId(userId);
-            return specRepository.save(newSpec);
+            Spec justCreated = specRepository.save(newSpec);
+            kcAdminClient.CreateFilesResource(userId, justCreated.getId());
+            kcAdminClient.CreateSpec(newSpec.getName(), justCreated.getId(), userId);
+            return justCreated;
         } else {
             throw new UserNotFoundException(userId);
         }

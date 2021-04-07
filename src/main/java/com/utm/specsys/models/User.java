@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class User {
 
-    Long id;
+    String id;
 
     String firstName;
 
@@ -21,31 +21,11 @@ public class User {
 
     }
 
-    public User(Long id, String firstName, String lastName, Set<Spec> specs) {
+    public User(String id, String firstName, String lastName, Set<Spec> specs) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.specs = specs;
-    }
-
-    public User id(Long id) {
-        setId(id);
-        return this;
-    }
-
-    public User firstName(String firstName) {
-        setFirstName(firstName);
-        return this;
-    }
-
-    public User lastName(String lastName) {
-        setLastName(lastName);
-        return this;
-    }
-
-    public User specs(Set<Spec> specs) {
-        setSpecs(specs);
-        return this;
     }
 
     @Override
@@ -91,11 +71,11 @@ public class User {
     }
  
 
-    public Long getId() {
+    public String getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

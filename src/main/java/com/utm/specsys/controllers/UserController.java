@@ -22,12 +22,14 @@ public class UserController {
 
     @PostMapping("/users")
     public ResponseEntity<?> newUser(@RequestBody User newUser) {
-       return kcAdminClient.SaveUser(newUser);
+        User user = kcAdminClient.SaveUser(newUser);
+        kcAdminClient.CreateSpecsResource(user.getId());
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/users/signin")
     public ResponseEntity<?> logIn(@RequestBody User registeredUser) {
-       return kcAdminClient.SignIn(registeredUser);
+        return kcAdminClient.SignIn(registeredUser);
     }
 
     @GetMapping("/users/{id}")

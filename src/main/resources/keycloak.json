@@ -1,0 +1,17 @@
+{
+    "realm": "SpringBootRealm",
+    "auth-server-url" : "http://172.16.1.83:8080/auth",
+    "resource" : "resource-server",
+    "credentials": {
+      "secret": "b0fcb0fc-c1d0-4f9b-916e-e91c2e38405d"
+    },
+    "policy-enforcer": {
+      "user-managed-access" : {},
+      "paths": [
+        {
+          "name": "CheckIdentity from keycloak.json",
+          "path": "/api/authz/checkIdentity"
+        }
+      ]
+    }
+}
