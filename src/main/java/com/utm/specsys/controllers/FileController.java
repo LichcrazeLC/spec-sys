@@ -1,5 +1,6 @@
 package com.utm.specsys.controllers;
 
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
@@ -28,13 +29,15 @@ public class FileController {
     KeycloakService kcAdminClient;
 
     @PostMapping(value = "/users/{userId}/specs/{specId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    Long uploadFile(@RequestParam MultipartFile file, @PathVariable String userId, @PathVariable Long specId) throws Exception {
+    Long uploadFile(@RequestParam MultipartFile file, @PathVariable String userId, @PathVariable Long specId, @RequestHeader("Authorization") String authHeader) throws Exception {
 
         Spec spec = specRepository.findByIdAndUserId(specId, userId).orElseThrow(() ->  new SpecNotFoundForUserException(specId, userId));
 
         Long result = fileLocationService.save(file.getBytes(), file.getOriginalFilename(), spec);
 
-        kcAdminClient.CreateFile(file.getOriginalFilename(), specId, userId);
+        UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
+
+        kcAdminClient.CreateFile(file.getOriginalFilename(), specId, foundUser, authHeader);
         
         return result;
     }

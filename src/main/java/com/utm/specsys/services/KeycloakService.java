@@ -2,7 +2,6 @@ package com.utm.specsys.services;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.Configuration;
+import org.keycloak.authorization.client.resource.PolicyResource;
 import org.keycloak.authorization.client.resource.ProtectedResource;
 import org.keycloak.authorization.client.resource.ProtectionResource;
 import org.keycloak.representations.AccessTokenResponse;
@@ -28,7 +28,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
-import org.keycloak.representations.idm.authorization.ScopeRepresentation;
+import org.keycloak.representations.idm.authorization.UmaPermissionRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class KeycloakService {
     String realm;
     @Value("${keycloak.user-role}")
     String role;
-    @Value("${keycloak-client-secret}")
+    @Value("${keycloak.credentials.secret}")
     String clientSecret;
     @Value("${keycloak.resource}")
     String clientId;
@@ -51,7 +51,7 @@ public class KeycloakService {
 
     public KeycloakService(@Value("${keycloak.auth-server-url}") String serverUrl,
             @Value("${keycloak.realm}") String realm, @Value("${keycloak.resource}") String clientId,
-            @Value("${keycloak-client-secret}") String clientSecret,
+            @Value("${keycloak.credentials.secret}") String clientSecret,
             @Value("${keycloak-realm-admin.username}") String userName,
             @Value("${keycloak-realm-admin.password}") String password, @Value("${keycloak-user-role}") String role) {
         if (keycloak == null) {
@@ -154,79 +154,127 @@ public class KeycloakService {
         usersResource.get(id).resetPassword(passwordCred);
     }
 
-    public void CreateSpec(String specName, Long specId, String userId) {
+    public void CreateSpec(String specName, Long specId, UserRepresentation user, String authToken) {
 
         keycloak.tokenManager().getAccessToken();
 
-        HashSet<ScopeRepresentation> scopes = new HashSet<>();
-        scopes.add(new ScopeRepresentation("All-Access"));
-
-        ResourceRepresentation resource = new ResourceRepresentation(userId + specId, scopes,
-                "/users/" + userId + "/specs/" + specId, "urn:apibeaver-app:resources:specs");
+        ResourceRepresentation resource = new ResourceRepresentation("Spec " + specName + " of user " + user.getEmail(),
+                null, "/users/" + user.getId() + "/specs/" + specId, "urn:apibeaver-app:resources:specs");
 
         AuthzClient authzClient = AuthzClient.create();
         ProtectionResource protectionResource = authzClient.protection();
         ProtectedResource resourceClient = protectionResource.resource();
 
-        resource.setOwner(userId);
-        resourceClient.create(resource);
+        resource.setOwner(user.getId());
+        resource.setOwnerManagedAccess(true);
+        resource = resourceClient.create(resource);
+
+        UmaPermissionRepresentation ownerPermission = new UmaPermissionRepresentation();
+        ownerPermission.setName("Permission to access spec " + specId + " for user " + user.getEmail());
+        ownerPermission.setDescription("Owner is allowed to access");
+        ownerPermission.addClient("resource-server");
+        ownerPermission.addUser(user.getEmail());
+
+        PolicyResource policyClient = AuthzClient.create().protection(authToken.substring(6))
+                .policy(resource.getId());
+
+        policyClient.create(ownerPermission);
 
     }
 
-    public void CreateFile(String fileName, Long specId, String userId) {
+    public void CreateFile(String fileName, Long specId, UserRepresentation user, String authToken) {
 
         keycloak.tokenManager().getAccessToken();
 
-        HashSet<ScopeRepresentation> scopes = new HashSet<>();
-        scopes.add(new ScopeRepresentation("All-Access"));
-
-        ResourceRepresentation resource = new ResourceRepresentation(userId + specId + fileName, scopes,
-                "/users/" + userId + "/specs/" + specId + "/files/" + fileName, "urn:apibeaver-app:resources:files");
+        ResourceRepresentation resource = new ResourceRepresentation(
+                "File " + fileName + " of user " + user.getEmail() + " for spec " + specId, null,
+                "/users/" + user.getId() + "/specs/" + specId + "/files/" + fileName,
+                "urn:apibeaver-app:resources:files");
 
         AuthzClient authzClient = AuthzClient.create();
         ProtectionResource protectionResource = authzClient.protection();
         ProtectedResource resourceClient = protectionResource.resource();
 
-        resource.setOwner(userId);
-        resourceClient.create(resource);
+        resource.setOwner(user.getId());
+        resource.setOwnerManagedAccess(true);
+        resource = resourceClient.create(resource);
 
+        UmaPermissionRepresentation ownerPermission = new UmaPermissionRepresentation();
+        ownerPermission.setName("Permission to access file " + fileName + " for spec " + specId + " of user " + user.getEmail());
+        ownerPermission.setDescription("Owner is allowed to access");
+        ownerPermission.addClient("resource-server");
+        ownerPermission.addUser(user.getEmail());
+
+        PolicyResource policyClient = AuthzClient.create().protection(authToken.substring(6))
+                .policy(resource.getId());
+
+        policyClient.create(ownerPermission);
     }
 
-    public void CreateSpecsResource(String userId) {
+    public void CreateSpecsResource(User user) {
 
         keycloak.tokenManager().getAccessToken();
-        
-        HashSet<ScopeRepresentation> scopes = new HashSet<>();
-        scopes.add(new ScopeRepresentation("All-Access"));
 
-        ResourceRepresentation resource = new ResourceRepresentation("Specs for " + userId, scopes,
-                "/users/" + userId + "/specs", "urn:apibeaver-app:resources:specs");
+        ResourceRepresentation resource = new ResourceRepresentation("Specs for " + user.getEmail(), null,
+                "/users/" + user.getId() + "/specs", "urn:apibeaver-app:resources:specs");
 
         AuthzClient authzClient = AuthzClient.create();
         ProtectionResource protectionResource = authzClient.protection();
         ProtectedResource resourceClient = protectionResource.resource();
 
-        resource.setOwner(userId);
-        resourceClient.create(resource);
+        resource.setOwner(user.getId());
+        resource.setOwnerManagedAccess(true);
+        resource = resourceClient.create(resource);
 
+        // ADD PERMISSION TO THE RESOURCE
+
+        UmaPermissionRepresentation ownerPermission = new UmaPermissionRepresentation();
+        ownerPermission.setName("Permission to access own specs for " + user.getEmail());
+        ownerPermission.setDescription("Owner is allowed to access");
+        ownerPermission.addClient("resource-server");
+        ownerPermission.addUser(user.getEmail());
+
+        PolicyResource policyClient = AuthzClient.create().protection(user.getEmail(), user.getPassword())
+                .policy(resource.getId());
+
+        policyClient.create(ownerPermission);
     }
 
-    public void CreateFilesResource(String userId, Long specId) {
+    public void CreateFilesResource(UserRepresentation user, Long specId, String authToken) {
 
-        keycloak.tokenManager().getAccessToken();
-        HashSet<ScopeRepresentation> scopes = new HashSet<>();
-        scopes.add(new ScopeRepresentation("All-Access"));
-
-        ResourceRepresentation resource = new ResourceRepresentation("Files for " + userId + specId, scopes,
-                "/users/" + userId + "/specs/" + specId + "/files", "urn:apibeaver-app:resources:files");
+        ResourceRepresentation resource = new ResourceRepresentation(
+                "Files for " + user.getEmail() + " and spec " + specId, null,
+                "/users/" + user.getId() + "/specs/" + specId + "/files", "urn:apibeaver-app:resources:files");
 
         AuthzClient authzClient = AuthzClient.create();
         ProtectionResource protectionResource = authzClient.protection();
         ProtectedResource resourceClient = protectionResource.resource();
 
-        resource.setOwner(userId);
-        resourceClient.create(resource);
+        resource.setOwner(user.getId());
+        resource.setOwnerManagedAccess(true);
+        resource = resourceClient.create(resource);
+
+        UmaPermissionRepresentation ownerPermission = new UmaPermissionRepresentation();
+        ownerPermission.setName("Permission to access own files for " + user.getEmail() + " for spec " + specId);
+        ownerPermission.setDescription("Owner is allowed to access");
+        ownerPermission.addClient("resource-server");
+        ownerPermission.addUser(user.getEmail());
+
+        PolicyResource policyClient = AuthzClient.create().protection(authToken.substring(6))
+                .policy(resource.getId());
+
+        policyClient.create(ownerPermission);
 
     }
+
+    // public void findPermissions()
+    // {
+    // AuthzClient authzClient = AuthzClient.create();
+    // PolicyResource policyClient = authzClient.protection("will01@mail.ru",
+    // "lovesilviu").policy("bdddcce4-cfbd-4d60-ae31-05a890e8262b");
+    // List<UmaPermissionRepresentation> permList = policyClient.find("A Policy 10",
+    // "", 0, 5);
+    // UmaPermissionRepresentation ownerPermission = permList.get(0);
+    // }
 
 }

@@ -34,13 +34,13 @@ public class SpecController {
     }
 
     @PostMapping("/users/{userId}/specs")
-    Spec newSpec(@PathVariable String userId, @RequestBody Spec newSpec) {
+    Spec newSpec(@PathVariable String userId, @RequestBody Spec newSpec, @RequestHeader("Authorization") String authHeader) {
         UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
         if (foundUser != null) {
             newSpec.setUserId(userId);
             Spec justCreated = specRepository.save(newSpec);
-            kcAdminClient.CreateFilesResource(userId, justCreated.getId());
-            kcAdminClient.CreateSpec(newSpec.getName(), justCreated.getId(), userId);
+            kcAdminClient.CreateFilesResource(foundUser, justCreated.getId(), authHeader);
+            kcAdminClient.CreateSpec(newSpec.getName(), justCreated.getId(), foundUser, authHeader);
             return justCreated;
         } else {
             throw new UserNotFoundException(userId);

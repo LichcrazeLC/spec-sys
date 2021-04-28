@@ -23,7 +23,7 @@ public class UserController {
     @PostMapping("/users")
     public ResponseEntity<?> newUser(@RequestBody User newUser) {
         User user = kcAdminClient.SaveUser(newUser);
-        kcAdminClient.CreateSpecsResource(user.getId());
+        kcAdminClient.CreateSpecsResource(user);
         return ResponseEntity.ok(user);
     }
 
