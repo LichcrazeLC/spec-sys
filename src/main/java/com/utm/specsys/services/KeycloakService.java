@@ -267,6 +267,33 @@ public class KeycloakService {
 
     }
 
+    public void CreateZipContentResource(UserRepresentation user, Long specId, String authToken) {
+
+        ResourceRepresentation resource = new ResourceRepresentation(
+                "ZipContent for " + user.getEmail() + " and spec " + specId, null,
+                "/users/" + user.getId() + "/specs/" + specId + "/zipContent", "urn:apibeaver-app:resources:files");
+
+        AuthzClient authzClient = AuthzClient.create();
+        ProtectionResource protectionResource = authzClient.protection();
+        ProtectedResource resourceClient = protectionResource.resource();
+
+        resource.setOwner(user.getId());
+        resource.setOwnerManagedAccess(true);
+        resource = resourceClient.create(resource);
+
+        UmaPermissionRepresentation ownerPermission = new UmaPermissionRepresentation();
+        ownerPermission.setName("Permission to access zip content for " + user.getEmail() + " for spec " + specId);
+        ownerPermission.setDescription("Owner is allowed to access");
+        ownerPermission.addClient("resource-server");
+        ownerPermission.addUser(user.getEmail());
+
+        PolicyResource policyClient = AuthzClient.create().protection(authToken.substring(6))
+                .policy(resource.getId());
+
+        policyClient.create(ownerPermission);
+
+    }
+
     // public void findPermissions()
     // {
     // AuthzClient authzClient = AuthzClient.create();

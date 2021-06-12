@@ -7,7 +7,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.utm.specsys.exceptions.SpecNotFoundForUserException;
 import com.utm.specsys.models.Spec;
@@ -53,7 +58,36 @@ public class FileController {
     }
 
     @GetMapping(value = "/users/{userId}/specs/{specId}/files")
-    List<String> getFileNames(@PathVariable String userId, @PathVariable Long specId) throws Exception {
-        return fileLocationService.findAllFileNames(userId, specId);
+    List<String> getFileNames(@PathVariable String userId, @PathVariable Long specId, @RequestParam(required = false) String fileType, @RequestParam(required = false) String fileContent) throws Exception {
+        if (fileType == null && fileContent == null){
+            return fileLocationService.findAllFileNames(userId, specId);
+        } 
+        else {
+            return fileLocationService.findAllFileNamesByType(userId, specId, fileType);
+        }
+
+    }
+
+    @GetMapping(value = "/users/{userId}/specs/{specId}/zipContent")
+    FileOutputStream getFileContent(@PathVariable String userId, @PathVariable Long specId) throws Exception {
+
+        List<FileSystemResource> specFiles = fileLocationService.findAll(userId, specId);
+        FileOutputStream fos = new FileOutputStream("Compressed" + specId + ".zip");
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        for (FileSystemResource srcFile : specFiles) {
+            InputStream fis = srcFile.getInputStream();
+            ZipEntry zipEntry = new ZipEntry(srcFile.getFilename());
+            zipOut.putNextEntry(zipEntry);
+
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        }
+        zipOut.close();
+        fos.close();
+        return fos;
     }
 }

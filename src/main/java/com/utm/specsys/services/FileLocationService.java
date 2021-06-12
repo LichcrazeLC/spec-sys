@@ -1,5 +1,6 @@
 package com.utm.specsys.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.utm.specsys.exceptions.FileNotFoundForSpecException;
@@ -46,13 +47,39 @@ public class FileLocationService {
         return fileRepository.findInFileSystem(file.getLocation());
     }
 
-    public List<String> findAllFileNames(String userId, Long specId) {
+    public List<FileSystemResource> findAll(String userId, Long specId) {
 
         if (!specRepository.existsByIdAndUserId(specId, userId)) {
             throw new SpecNotFoundForUserException(specId, userId);
         }
 
+        List<File> files = fileDbRepository.findBySpecId(specId);
+
+        List<FileSystemResource> fileList = new ArrayList<>();
+
+        for (File file : files) {
+            fileList.add(fileRepository.findInFileSystem(file.getLocation()));
+        }
+
+        return fileList;
+    }
+
+    public List<String> findAllFileNames(String userId, Long specId) {
+
+        if (!specRepository.existsByIdAndUserId(specId, userId)) {
+            throw new SpecNotFoundForUserException(specId, userId);  
+        }
+
         return fileDbRepository.findAllFileNamesBySpecId(specId);
+    }
+
+    public List<String> findAllFileNamesByType(String userId, Long specId, String fileType) {
+
+        if (!specRepository.existsByIdAndUserId(specId, userId)) {
+            throw new SpecNotFoundForUserException(specId, userId);  
+        }
+
+        return fileDbRepository.findAllFileNamesBySpecIdAndType(specId, fileType);
     }
 
     public Long replace(byte[] bytes, String newFileName, String userId, Long specId, String fileName) {

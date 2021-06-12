@@ -40,6 +40,7 @@ public class SpecController {
             newSpec.setUserId(userId);
             Spec justCreated = specRepository.save(newSpec);
             kcAdminClient.CreateFilesResource(foundUser, justCreated.getId(), authHeader);
+            kcAdminClient.CreateZipContentResource(foundUser, justCreated.getId(), authHeader);
             kcAdminClient.CreateSpec(newSpec.getName(), justCreated.getId(), foundUser, authHeader);
             return justCreated;
         } else {
