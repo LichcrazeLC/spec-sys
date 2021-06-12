@@ -3,7 +3,9 @@ package com.utm.specsys.controllers;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +15,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.utm.specsys.exceptions.SpecNotFoundForUserException;
 import com.utm.specsys.models.Spec;
@@ -68,26 +72,26 @@ public class FileController {
 
     }
 
-    @GetMapping(value = "/users/{userId}/specs/{specId}/zipContent")
-    FileOutputStream getFileContent(@PathVariable String userId, @PathVariable Long specId) throws Exception {
+    @GetMapping(value = "/users/{userId}/specs/{specId}/zipContent", produces="application/zip")
+    void getFileContent(@PathVariable String userId, @PathVariable Long specId, HttpServletResponse response) throws Exception {
 
         List<FileSystemResource> specFiles = fileLocationService.findAll(userId, specId);
-        FileOutputStream fos = new FileOutputStream("Compressed" + specId + ".zip");
-        ZipOutputStream zipOut = new ZipOutputStream(fos);
-        for (FileSystemResource srcFile : specFiles) {
-            InputStream fis = srcFile.getInputStream();
-            ZipEntry zipEntry = new ZipEntry(srcFile.getFilename());
-            zipOut.putNextEntry(zipEntry);
 
-            byte[] bytes = new byte[1024];
-            int length;
-            while((length = fis.read(bytes)) >= 0) {
-                zipOut.write(bytes, 0, length);
-            }
-            fis.close();
+        
+        ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
+
+        for (FileSystemResource srcFile : specFiles) {
+
+            ZipEntry zipEntry = new ZipEntry(srcFile.getFilename());
+            zipEntry.setSize(srcFile.contentLength());
+            zipOut.putNextEntry(zipEntry);
+            StreamUtils.copy(srcFile.getInputStream(), zipOut);
+		    zipOut.closeEntry();
         }
+        zipOut.finish();
         zipOut.close();
-        fos.close();
-        return fos;
+
+        response.setStatus(HttpServletResponse.SC_OK);
+	    response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + userId + specId + "\"");
     }
 }
