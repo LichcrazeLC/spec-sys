@@ -9,9 +9,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -77,9 +74,7 @@ public class FileController {
 
         List<FileSystemResource> specFiles = fileLocationService.findAll(userId, specId);
 
-        
         ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
-
         for (FileSystemResource srcFile : specFiles) {
 
             ZipEntry zipEntry = new ZipEntry(srcFile.getFilename());

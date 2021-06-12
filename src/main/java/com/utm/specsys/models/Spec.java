@@ -38,6 +38,8 @@ public class Spec {
 
     private String userId;
 
+    Boolean isPublic;
+
     @OneToMany(fetch = FetchType.LAZY,mappedBy="spec")
     @JsonIgnore
     private Set<File> files;
@@ -46,18 +48,28 @@ public class Spec {
 
     }
 
-    public Spec(Long id, String name, LocalDateTime created, LocalDateTime updated, String userId, Set<File> files) {
+    public Spec(Long id, String name, LocalDateTime created, LocalDateTime updated, String userId, Boolean isPublic, Set<File> files) {
         this.id = id;
         this.name = name;
         this.created = created;
         this.updated = updated;
         this.userId = userId;
+        this.isPublic = isPublic;
         this.files = files;
     }
 
     public Long getId() {
         return this.id;
     }
+
+    public Boolean getIsPublic() {
+        return this.isPublic;
+    }
+
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
 
     public void setId(Long id) {
         this.id = id;

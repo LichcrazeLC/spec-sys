@@ -33,6 +33,11 @@ public class SpecController {
         }
     }
 
+    @GetMapping("/specs")
+    List<Spec> all(){
+        return specRepository.findAllPublicSpecs();
+    }
+
     @PostMapping("/users/{userId}/specs")
     Spec newSpec(@PathVariable String userId, @RequestBody Spec newSpec, @RequestHeader("Authorization") String authHeader) {
         UserRepresentation foundUser = kcAdminClient.GetUserById(userId);
@@ -68,6 +73,7 @@ public class SpecController {
         if (foundUser != null) {
             return specRepository.findByIdAndUserId(id, userId).map(Spec -> {
                 Spec.setName(newSpec.getName());
+                Spec.setIsPublic(newSpec.getIsPublic());
                 return specRepository.save(Spec);
             }).orElseThrow(() -> new SpecNotFoundForUserException(id, userId));
         } else {
